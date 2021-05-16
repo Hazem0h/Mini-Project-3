@@ -51,6 +51,10 @@ def get_tiny_images(image_paths):
         rescaled_image = resize(image, output_shape = (RESCALE_SIZE, RESCALE_SIZE))
         # unroll into 1D vector
         unrolled = np.reshape(rescaled_image, newshape = (RESCALE_SIZE**2,))
+        # zero mean
+        unrolled = unrolled - unrolled.mean()
+        # normalize
+        unrolled = unrolled / (np.sqrt(np.sum(np.square(unrolled))))
         # add to the output array
         all_data[index] = unrolled
         
