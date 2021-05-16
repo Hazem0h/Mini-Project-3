@@ -37,10 +37,28 @@ def get_tiny_images(image_paths):
     Suggested functions: skimage.transform.resize, skimage.color.rgb2grey,
                          skimage.io.imread, np.reshape
     """
-
-    # TODO: Implement this function!
-
-    return np.array([])
+    # define some helpful constants
+    RESCALE_SIZE = 16
+    n = len(image_paths)
+    d = RESCALE_SIZE ** 2
+    # initialize the output array
+    all_data = np.empty((n, d))
+    # loop over all image paths
+    for index, path in enumerate(image_paths):
+        # read the image
+        image = imread(path, as_gray=True)
+        # reshape the image
+        rescaled_image = resize(image, output_shape = (RESCALE_SIZE, RESCALE_SIZE))
+        # unroll into 1D vector
+        unrolled = np.reshape(rescaled_image, newshape = (RESCALE_SIZE**2,))
+        # zero mean
+        unrolled = unrolled - unrolled.mean()
+        # normalize
+        unrolled = unrolled / (np.sqrt(np.sum(np.square(unrolled))))
+        # add to the output array
+        all_data[index] = unrolled
+        
+    return all_data
 
 
 def build_vocabulary(image_paths, vocab_size):
