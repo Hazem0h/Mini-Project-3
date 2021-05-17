@@ -242,15 +242,28 @@ def nearest_neighbor_classify(train_image_feats, train_labels, test_image_feats)
     """
 
     k = 1
+    dist = "euclidean"
 
     # Gets the distance between each test image feature and each train image feature
-    # e.g., cdist
-    distances = cdist(test_image_feats, train_image_feats, 'euclidean')
+    distances = cdist(test_image_feats, train_image_feats,  dist)
 
-    # TODO:
-    # 1) Find the k closest features to each test image feature in euclidean space
-    # 2) Determine the labels of those k features
-    # 3) Pick the most common label from the k
-    # 4) Store that label in a list
+    # Get the indeces of the sorted the distances across each row
+    sorted_indeces = np.argsort(distances, axis = 1)
 
-    return np.array([])
+    # get the indeces of the nearest kth points for each row (test image)
+    k_nearest_indeces = sorted_indeces[:, :k]
+    
+    # get the corresponding labels (map each index to its label, per row), (use list() for eager evaluation)
+    # initiate the mapping function and the labels list
+    mapping_function = lambda x: train_labels[x]
+    labels = []
+
+    # loop over each point, and get the labels of the nearest k points
+    for row in k_nearest_indeces:
+        mapped_labels = list(map(mapping_function, row))
+        labels.append(mapped_labels)
+
+    # get the most occuring label, per row (get the element with maximum count, per row)
+    most_occuring_labels = [max(row, key = row.count) for row in labels]
+
+    return np.array(most_occuring_labels)

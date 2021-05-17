@@ -1,2 +1,10 @@
 
 data/
+
+code/results_webpage/
+
+code/__pycache__/
+
+code/.vscode/
+
+code/testing.py
