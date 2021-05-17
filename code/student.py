@@ -202,7 +202,7 @@ def svm_classify(train_image_feats, train_labels, test_image_feats):
     return np.array([])
 
 
-def nearest_neighbor_classify(train_image_feats, train_labels, test_image_feats):
+def nearest_neighbor_classify(train_image_feats, train_labels, test_image_feats, k = 1, dist = "euclidean"):
     """
     This function will predict the category for every test image by finding
     the training image with most similar features. You will complete the given
@@ -240,9 +240,6 @@ def nearest_neighbor_classify(train_image_feats, train_labels, test_image_feats)
     Useful functions:
         scipy.spatial.distance.cdist, np.argsort, scipy.stats.mode
     """
-
-    k = 1
-    dist = "euclidean"
 
     # Gets the distance between each test image feature and each train image feature
     distances = cdist(test_image_feats, train_image_feats,  dist)
