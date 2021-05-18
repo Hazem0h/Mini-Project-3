@@ -48,7 +48,7 @@ def get_tiny_images(image_paths):
         # read the image
         image = imread(path, as_gray=True)
         # reshape the image
-        rescaled_image = resize(image, output_shape = (RESCALE_SIZE, RESCALE_SIZE))
+        rescaled_image = resize(image, output_shape = (RESCALE_SIZE, RESCALE_SIZE), anti_aliasing=True)
         # unroll into 1D vector
         unrolled = np.reshape(rescaled_image, newshape = (RESCALE_SIZE**2,))
         # zero mean
