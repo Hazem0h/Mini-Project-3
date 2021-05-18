@@ -194,10 +194,32 @@ def get_bags_of_words(image_paths):
 
     vocab = np.load('vocab.npy')
     print('Loaded vocab from file.')
+    
+    n_clusters = vocab.shape[0]
+    bags_of_words = np.zeros((len(image_paths), n_clusters))
+    # loop over each image
+    for example_index, path in enumerate(image_paths):
+        if example_index% 10 == 0:
+            print("Bag of words example", example_index)
+        image = imread(path, as_gray=True)
 
-    # TODO: Implement this function!
+        # get the hog features of the image
+        hog_features = hog(image, pixels_per_cell=(N_PIXELS, N_PIXELS), cells_per_block=(N_CELLS, N_CELLS), feature_vector=True)
+        hog_features = hog_features.reshape(-1, N_CELLS * N_CELLS * 9)
 
-    return np.array([])
+        # get the distance between each hog feature and the centroid
+        distances = cdist(hog_features, vocab, "euclidean")
+        nearest_cluster_indices = np.argsort(distances, axis = 1)[:,0]
+
+        # iniitalize the histogram
+        hist = np.zeros((n_clusters,))
+        for cluster_index in nearest_cluster_indices:
+            hist[cluster_index] += 1
+
+        bags_of_words[example_index] = hist
+
+    print("Done building bags of words")
+    return bags_of_words
 
 
 def svm_classify(train_image_feats, train_labels, test_image_feats):
@@ -267,6 +289,7 @@ def nearest_neighbor_classify(train_image_feats, train_labels, test_image_feats,
         scipy.spatial.distance.cdist, np.argsort, scipy.stats.mode
     """
 
+    print("Calssifying using KNN")
     # Gets the distance between each test image feature and each train image feature
     distances = cdist(test_image_feats, train_image_feats,  dist)
 
