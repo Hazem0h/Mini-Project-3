@@ -5,7 +5,7 @@ from skimage.color import rgb2grey
 from skimage.feature import hog
 from skimage.transform import resize
 from scipy.spatial.distance import cdist
-
+from sklearn.cluster import KMeans
 
 def get_tiny_images(image_paths):
     """
@@ -131,9 +131,33 @@ def build_vocabulary(image_paths, vocab_size):
     details)
     """
 
-    # TODO: Implement this function!
+    # hyper parameters
+    n_cells = 4
+    n_pixels = 4
 
-    return np.array([])
+    # initialize all hog features
+    features_list = []
+    # loop over all images and extract hog features
+    for path in image_paths:
+        image = imread(path, as_gray=True)
+        image_hog_vectors = hog(image, cells_per_block = (n_cells, n_cells),
+                                        pixels_per_cell= (n_pixels, n_pixels), feature_vector= True)
+
+        # each row is the feature vectorssss of a block (interest point)
+        image_hog_vectors = image_hog_vectors.reshape(-1, n_cells*n_cells*9)
+
+        # append to all hog features
+        features_list.append(image_hog_vectors)
+
+    # now stack them all vertically
+    all_hog_features = np.vstack(features_list)
+
+    # now cluster them using kmeans ########################################(tol ????)
+    CluseterObj = KMeans(n_clusters = vocab_size, max_iter= 100)
+    CluseterObj.fit(all_hog_features)
+    centroids = CluseterObj.cluster_centers_
+
+    return centroids
 
 
 def get_bags_of_words(image_paths):
@@ -262,5 +286,4 @@ def nearest_neighbor_classify(train_image_feats, train_labels, test_image_feats,
 
     # get the most occuring label, per row (get the element with maximum count, per row)
     most_occuring_labels = [max(row, key = row.count) for row in labels]
-
     return np.array(most_occuring_labels)
