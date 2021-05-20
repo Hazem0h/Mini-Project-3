@@ -6,6 +6,7 @@ from skimage.feature import hog
 from skimage.transform import resize
 from scipy.spatial.distance import cdist
 from sklearn.cluster import MiniBatchKMeans, KMeans
+from sklearn.svm import LinearSVC
 
 # global variables
 N_CELLS = 4
@@ -57,7 +58,7 @@ def get_tiny_images(image_paths):
         unrolled = np.reshape(rescaled_image, newshape = (RESCALE_SIZE**2,))
         # zero mean
         unrolled = unrolled - unrolled.mean()
-        # normalize
+        # normalize to unit length
         unrolled = unrolled / (np.sqrt(np.sum(np.square(unrolled))))
         # add to the output array
         all_data[index] = unrolled
@@ -245,9 +246,18 @@ def svm_classify(train_image_feats, train_labels, test_image_feats):
     above in just one call! Be sure to read the documentation carefully.
     """
 
-    # TODO: Implement this function!
-
-    return np.array([])
+    #multi_class='crammer_singer' #another method but we will use ovr
+    multi_class='ovr' # one versus rest
+    
+    clf = LinearSVC(penalty = 'l2', loss = 'squared_hinge',
+                                multi_class = multi_class, intercept_scaling = 1, class_weight = None,
+                                verbose = 0, random_state = None,
+                                tol = 1e-3)
+    out = clf.fit(train_image_feats, train_labels)
+    
+    prediction = out.predict(test_image_feats)
+    
+    return prediction
 
 
 def nearest_neighbor_classify(train_image_feats, train_labels, test_image_feats, k = 1, dist = "euclidean"):
