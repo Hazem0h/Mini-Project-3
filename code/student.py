@@ -208,8 +208,8 @@ def get_bags_of_words(image_paths):
         hog_features = hog(image, pixels_per_cell=(N_PIXELS, N_PIXELS), cells_per_block=(N_CELLS, N_CELLS), feature_vector=True)
         hog_features = hog_features.reshape(-1, N_CELLS * N_CELLS * 9)
 
-        # get the distance between each hog feature and the centroid
-        distances = cdist(hog_features, vocab, "euclidean")
+        # get the distance between each hog feature and the centroid (Chi-square distance)
+        distances = cdist(hog_features, vocab, lambda x,y: 0.5*np.sum(np.square(x-y)/(x+y)))
         nearest_cluster_indices = np.argsort(distances, axis = 1)[:,0]
 
         # iniitalize the histogram
@@ -217,6 +217,10 @@ def get_bags_of_words(image_paths):
         for cluster_index in nearest_cluster_indices:
             hist[cluster_index] += 1
 
+        # normalize the histogram to unit length
+        hist = hist / np.sqrt(np.sum(np.square(hist)))
+        
+        # assign the histogram to its proper location 
         bags_of_words[example_index] = hist
 
     print("Done building bags of words")
@@ -252,7 +256,7 @@ def svm_classify(train_image_feats, train_labels, test_image_feats):
     clf = LinearSVC(penalty = 'l2', loss = 'squared_hinge',
                                 multi_class = multi_class, intercept_scaling = 1, class_weight = None,
                                 verbose = 0, random_state = None,
-                                tol = 1e-3)
+                                tol = 1)
     out = clf.fit(train_image_feats, train_labels)
     
     prediction = out.predict(test_image_feats)
@@ -260,7 +264,7 @@ def svm_classify(train_image_feats, train_labels, test_image_feats):
     return prediction
 
 
-def nearest_neighbor_classify(train_image_feats, train_labels, test_image_feats, k = 1, dist = "euclidean"):
+def nearest_neighbor_classify(train_image_feats, train_labels, test_image_feats, k = 3, dist = "euclidean"):
     """
     This function will predict the category for every test image by finding
     the training image with most similar features. You will complete the given
