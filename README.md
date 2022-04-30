@@ -1,5 +1,6 @@
 # Mini Project 3
-In this project we are required to perform multi-class classification for images of 15 classes (scenes). <br> 
+This is mini project 3, in the CIE 552 Computer Vision class at Zewail City. In this project we are required to perform multi-class classification for images of 15 classes (scenes). <br> 
+The project is adopted from a similar course in Brown University.
 ___
 # Image representation techniques:
 In both approaches in this project, we represent the image as a vector in some vector space. This enables us to utilize famous classification techniques, like KNN and SVMs, which are easily applicable once data is represented in vector format.
